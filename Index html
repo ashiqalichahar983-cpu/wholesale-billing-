@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ہول سیل بلنگ سافٹ ویئر</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body { margin: 0; padding: 15px; background-color: #f4f6f9; direction: rtl; }
+        .header { background: #007bff; color: white; padding: 15px; text-align: center; border-radius: 8px; margin-bottom: 15px; }
+        .status { font-size: 14px; background: #28a745; padding: 4px 8px; border-radius: 4px; display: inline-block; }
+        .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 15px; }
+        input, select, button { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; }
+        button { background-color: #28a745; color: white; border: none; font-weight: bold; cursor: pointer; }
+        button:active { background-color: #218838; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #f2f2f2; }
+        .total-box { font-size: 18px; font-weight: bold; color: #d9534f; margin-top: 10px; text-align: center; }
+        @media print { body * { visibility: hidden; } .printable, .printable * { visibility: visible; } .printable { position: absolute; left: 0; top: 0; width: 100%; } }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2>ہول سیل بلنگ ٹرمینل</h2>
+        <span class="status">وضع: آف لائن تیار (Offline Ready)</span>
+    </div>
+
+    <!-- کسٹمر کی معلومات -->
+    <div class="card">
+        <h3>1. پارٹی / کسٹمر کی تفصیل</h3>
+        <input type="text" id="custName" placeholder="کسٹمر یا دکان کا نام">
+        <input type="text" id="custPhone" placeholder="فون نمبر">
+    </div>
+
+    <!-- پروڈکٹ کا اندراج -->
+    <div class="card">
+        <h3>2. آئٹم کا اندراج کریں</h3>
+        <input type="text" id="itemName" placeholder="آئٹم کا نام (مثلاً: پین، نوٹس)">
+        <select id="unitType">
+            <option value="Piece">پیس (Piece)</option>
+            <option value="Box">باکس / کارٹن (Box/Carton)</option>
+        </select>
+        <input type="number" id="itemQty" placeholder="تعداد (Quantity)">
+        <input type="number" id="itemPrice" placeholder="فی اکائی قیمت (Price)">
+        <button onclick="addItem()" style="background-color: #17a2b8;">آئٹم شامل کریں (+)</button>
+    </div>
+
+    <!-- آرڈر کی فہرست -->
+    <div class="card printable">
+        <h3>آرڈر کی تفاصیل (Bill Summary)</h3>
+        <p id="billCustomer"></p>
+        <table>
+            <thead>
+                <tr>
+                    <th>آئٹم</th>
+                    <th>پیکنگ</th>
+                    <th>تعداد</th>
+                    <th>قیمت</th>
+                    <th>کل</th>
+                </tr>
+            </thead>
+            <tbody id="cartTable"></tbody>
+        </table>
+        <div class="total-box">کل واجب الادا رقم: Rs. <span id="grandTotal">0</span></div>
+    </div>
+
+    <!-- سیو اور پرنٹ بٹن -->
+    <button onclick="saveAndPrint()" style="padding: 15px; font-size: 18px;">بل سیو کریں اور پرنٹ نکالیں (Print)</button>
+
+    <script>
+        let cart = [];
+
+        function addItem() {
+            let name = document.getElementById('itemName').value;
+            let unit = document.getElementById('unitType').value;
+            let qty = parseFloat(document.getElementById('itemQty').value);
+            let price = parseFloat(document.getElementById('itemPrice').value);
+
+            if(!name || !qty || !price) {
+                alert("براہ کرم تمام خانے پر کریں!");
+                return;
+            }
+
+            let total = qty * price;
+            cart.push({ name, unit, qty, price, total });
+            updateCart();
+
+            // خانے خالی کریں
+            document.getElementById('itemName').value = '';
+            document.getElementById('itemQty').value = '';
+            document.getElementById('itemPrice').value = '';
+        }
+
+        function updateCart() {
+            let table = document.getElementById('cartTable');
+            table.innerHTML = '';
+            let grandTotal = 0;
+
+            cart.forEach((item) => {
+                grandTotal += item.total;
+                table.innerHTML += `
+                    <tr>
+                        <td>${item.name}</td>
+                        <td>${item.unit}</td>
+                        <td>${item.qty}</td>
+                        <td>${item.price}</td>
+                        <td>${item.total}</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('grandTotal').innerText = grandTotal;
+            let cName = document.getElementById('custName').value || 'عام گاہک';
+            document.getElementById('billCustomer').innerText = "کسٹمر کا نام: " + cName;
+        }
+
+        function saveAndPrint() {
+            if(cart.length === 0) {
+                alert("بل خالی ہے!");
+                return;
+            }
+            window.print();
+        }
+    </script>
+</body>
+</html>
